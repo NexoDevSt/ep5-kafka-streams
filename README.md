@@ -40,10 +40,12 @@ kafka-topics --create --bootstrap-server localhost:9092 --replication-factor 2 -
 
 ### 4. Justificación de Diseño y Límites Conocidos
 
-*   **Configuración de Tópicos (RF y Min ISR):** Se configuró un Factor de Replicación (RF) de 2 debido a que el clúster base consta de dos brokers físicamente; un $RF=3$ arrojaría un error de asignación. Se estableció `min.insync.replicas=1` para garantizar la disponibilidad operativa: esto permite que, ante la caída del Broker 2 (como se demostró en la prueba), el productor siga inyectando datos y el consumidor siga agrupando ventanas apoyándose únicamente en el Broker 1.
-*   **Límites de exactly_once_v2 vs Deduplicación:** La configuración `exactly_once_v2` previene transacciones de red duplicadas a nivel de broker. No obstante, si el productor envía el mismo evento de negocio repetido, Kafka lo procesa como un mensaje nuevo.
-*   **Punto Único de Falla:** En esta arquitectura base, ZooKeeper operando en un solo nodo sigue siendo un punto único de falla (SPOF) crítico.
+### 4. Justificación de Diseño y Límites Conocidos
 
+*   **Configuración de Tópicos (RF y Min ISR):** Se configuró un Factor de Replicación (RF) de 2 debido a que el clúster base consta de dos brokers físicamente; un $RF=3$ arrojaría un error de asignación. Se estableció `min.insync.replicas=1` para garantizar la disponibilidad operativa: esto permite que, ante la caída del Broker 2 (como se demostró en la prueba), el productor siga inyectando datos y el consumidor siga agrupando ventanas apoyándose únicamente en el Broker 1.
+*   **Límites de exactly_once_v2 vs Deduplicación de Negocio:** La configuración `exactly_once_v2` garantiza que no haya transacciones de red duplicadas a nivel de broker durante un fallo. No obstante, como se ve en la prueba de duplicados, si el productor inyecta voluntariamente el mismo evento lógico (mismo `eventId`), Kafka lo procesa de nuevo. Para deduplicar esto a nivel de negocio, se requiere implementar un almacén de estado (State Store) que filtre los IDs previamente procesados[cite: 26, 28].
+*   **Restauración de Estado (Offsets y Changelog):** Durante la detención de la aplicación, los mensajes inyectados son retenidos en el tópico de Kafka. Al reiniciar Spring Boot, el consumidor se reconecta exitosamente desde el último offset confirmado (commit) y procesa los eventos acumulados de forma automática, garantizando la continuidad del negocio sin pérdida silenciosa de datos[cite: 26, 28].
+*   **Punto Único de Falla:** En esta arquitectura base, ZooKeeper operando en un solo nodo sigue siendo un punto único de falla (SPOF) crítico[cite: 27].
 
 **Anotacion**
 Cambiar ip de docker compose por ip propia.
