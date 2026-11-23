@@ -42,12 +42,12 @@ docker exec -it ep5-kafka-broker1-1 kafka-consumer-groups --bootstrap-server loc
 
 | Caso de Prueba | Descripción y Resultado Esperado | Evidencia |
 | :--- | :--- | :--- |
-| **Pruebas Automatizadas (Entorno)** | El proyecto compila correctamente y pasa la fase de test de Maven (`BUILD SUCCESS`) sin errores de dependencias ni fallos en el código fuente. | **Captura 10** (`evidencias/10.png`) |
-| **JSON Roto (Sintaxis DLQ)** | Se envía un payload JSON malformado (`{"eventId": "99", "tiendaId": `) a `POST /api/test?tiendaId=T01`; el stream evita descartarlo por timestamp negativo, detecta sintaxis inválida y lo deriva a `ventas-raw-dlq`. | **Captura 11** (`evidencias/11.png`) |
-| **Deduplicación con StateStore** | Se envía dos veces el mismo evento válido (`eventId: "100"`); el procesador con `StateStore` (`deduplication-store`) registra el primero y bloquea/ignora el duplicado (`⚠️ EVENTO DUPLICADO IGNORADO`). | **Captura 12** (`evidencias/12.png`) |
-| **Evento Tardío en Ventana de Gracia** | Se envía un evento válido con marca de tiempo anterior (`eventId: "101"`), dentro de la ventana *Tumbling* de 5 minutos y su gracia de 2 minutos, siendo aceptado y acumulado en el agregado. | **Captura 13** (`evidencias/13.png`) |
-| **Tópico Final con Ventanas** | Al consumir desde `ventas-agregadas`, se comprueba que los mensajes agregados incluyen los campos de ventana (`inicioVentana` y `finVentana`) junto con las métricas acumuladas. | **Captura 14** (`evidencias/14.png`) |
-| **Estado del Consumer Group y Lag** | Al describir `ventas-stream-app`, se verifica que el consumidor está activo y al día (`LAG = 0` en las particiones consumidas), sin rezago pendiente tras las pruebas. | **Captura 15** (`evidencias/15.png`) |
+| **Pruebas Automatizadas (Entorno)** | El proyecto compila correctamente y pasa la fase de test de Maven (`BUILD SUCCESS`) sin errores de dependencias ni fallos en el código fuente. ||
+| **JSON Roto (Sintaxis DLQ)** | Se envía un payload JSON malformado (`{"eventId": "99", "tiendaId": `) a `POST /api/test?tiendaId=T01`; el stream evita descartarlo por timestamp negativo, detecta sintaxis inválida y lo deriva a `ventas-raw-dlq`. |  |
+| **Deduplicación con StateStore** | Se envía dos veces el mismo evento válido (`eventId: "100"`); el procesador con `StateStore` (`deduplication-store`) registra el primero y bloquea/ignora el duplicado (`⚠️ EVENTO DUPLICADO IGNORADO`). | |
+| **Evento Tardío en Ventana de Gracia** | Se envía un evento válido con marca de tiempo anterior (`eventId: "101"`), dentro de la ventana *Tumbling* de 5 minutos y su gracia de 2 minutos, siendo aceptado y acumulado en el agregado. |  |
+| **Tópico Final con Ventanas** | Al consumir desde `ventas-agregadas`, se comprueba que los mensajes agregados incluyen los campos de ventana (`inicioVentana` y `finVentana`) junto con las métricas acumuladas. |  |
+| **Estado del Consumer Group y Lag** | Al describir `ventas-stream-app`, se verifica que el consumidor está activo y al día (`LAG = 0` en las particiones consumidas), sin rezago pendiente tras las pruebas. | |
 
 ---
 
